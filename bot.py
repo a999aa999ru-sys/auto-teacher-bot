@@ -527,4 +527,9 @@ if __name__ == '__main__':
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(init_db())
+    import threading
+    from web_server import app
+    from aiohttp import web
+    port = int(os.environ.get('PORT', 10000))
+    threading.Thread(target=lambda: web.run_app(app, host='0.0.0.0', port=port), daemon=True).start()
     executor.start_polling(dp, skip_updates=True)
