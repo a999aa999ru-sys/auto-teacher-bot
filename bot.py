@@ -523,13 +523,21 @@ async def handle_question(message: types.Message):
     else:
         await message.answer("Используй кнопки меню 👇", reply_markup=get_main_menu())
 
+import asyncio
+import threading
+from aiohttp import web
+from web_server import app
+
+async def start_web_server():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get('PORT', 10000))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+
 if __name__ == '__main__':
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(init_db())
-    import threading
-    from web_server import app
-    from aiohttp import web
-    port = int(os.environ.get('PORT', 10000))
-    threading.Thread(target=lambda: web.run_app(app, host='0.0.0.0', port=port), daemon=True).start()
+    loop.run_until_complete(start_web_server())
     executor.start_polling(dp, skip_updates=True)
